@@ -1,0 +1,84 @@
+<!-- src/app/pages/pedidos/pedidos.html -->
+<div class="pedidos-container">
+  <h2>Gestión de Pedidos</h2>
+
+  <!-- Sección de Creación de Pedido -->
+  <div class="card-form">
+    <h3>Crear Nuevo Pedido</h3>
+
+    <div class="form-row">
+      <input type="text" [(ngModel)]="clienteNuevo" placeholder="Nombre del Cliente" class="form-control" />
+    </div>
+
+    <div class="form-row inline">
+      <select [(ngModel)]="productoSeleccionadoId" class="form-control">
+        <option [ngValue]="null" disabled>Seleccione un producto</option>
+        @for (prod of productosDisponibles(); track prod.id) {
+          <option [value]="prod.id">{{ prod.nombre }} - S/ {{ prod.precio }} (Stock: {{ prod.stock }})</option>
+        }
+      </select>
+
+      <input type="number" [(ngModel)]="cantidadSeleccionada" min="1" class="form-control small" placeholder="Cant" />
+      <button type="button" class="btn-secondary" (click)="agregarItemAlPedido()">Añadir Item</button>
+    </div>
+
+    <div class="form-row inline descuento-row">
+      <label for="descuento">Descuento (%)</label>
+      <input id="descuento" type="number" [(ngModel)]="descuentoNuevo" min="0" max="100" class="form-control small" placeholder="0" />
+    </div>
+
+    @if (itemsPedido.length > 0) {
+      <ul class="items-list">
+        @for (item of itemsPedido; track $index) {
+          <li>
+            <span>{{ item.nombre }} (x{{ item.cantidad }})</span>
+            <button class="btn-danger-text" (click)="removerItem($index)">Eliminar</button>
+          </li>
+        }
+      </ul>
+
+      <div class="resumen-pedido">
+        <p><span>Subtotal:</span> <span>S/ {{ subtotalPedido | number:'1.2-2' }}</span></p>
+        <p><span>Descuento ({{ descuentoNuevo || 0 }}%):</span> <span>- S/ {{ montoDescuento | number:'1.2-2' }}</span></p>
+        <p class="total"><span>Total a pagar:</span> <span>S/ {{ totalConDescuento | number:'1.2-2' }}</span></p>
+      </div>
+
+      <button class="btn-primary" (click)="guardarPedido()">Confirmar y Registrar Pedido</button>
+    }
+  </div>
+
+  <!-- Listado de Pedidos Existentes -->
+  <div class="pedidos-list-section">
+    <h3>Historial de Pedidos Realizados</h3>
+
+    <div class="grid-pedidos">
+      @for (pedido of pedidos(); track pedido.id) {
+        <div class="pedido-card">
+          <div class="pedido-header">
+            <span class="pedido-id">Pedido #{{ pedido.id }}</span>
+            <span class="pedido-fecha">{{ pedido.fechaCompra | date:'medium' }}</span>
+          </div>
+          <div class="pedido-body">
+            <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+            @if (pedido.descuento) {
+              <p><strong>Descuento:</strong> {{ pedido.descuento }}%</p>
+            }
+            <p><strong>Monto Total:</strong> <span class="badge-total">S/ {{ pedido.montoTotal }}</span></p>
+
+            <h4>Detalles de la Compra:</h4>
+            <ul class="detalles-ul">
+              @for (det of pedido.detalles; track det.id) {
+                <li>
+                  <span>{{ det.producto.nombre }} (Cant: {{ det.cantidad }})</span>
+                  <span>Subtotal: S/ {{ det.subtotal }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      } @empty {
+        <p class="no-data">No hay pedidos registrados.</p>
+      }
+    </div>
+  </div>
+</div>
